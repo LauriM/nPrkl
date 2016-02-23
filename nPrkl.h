@@ -18,6 +18,10 @@
 
 #include <assert.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum np_color
 {
 	NP_BLACK = 0,
@@ -46,6 +50,7 @@ struct s_np_state {
 struct s_np_state np_state;
 
 // TODO
+// * Support for the HILIGHTED colors
 // * Callback for events (screenresize)
 // * Writing strings
 // * Buffering stuff for performance (?)
@@ -53,6 +58,7 @@ struct s_np_state np_state;
 // * better error handling
 // * Input support
 // * Hide cursor functionality
+// * static / extern include
 
 // Initialize the nPrkl library, should always be called first
 void np_init();
@@ -75,16 +81,15 @@ unsigned np_width();
 // Get console height in rows
 unsigned np_height();
 
+// #-----------------#
+// # implementations #
+// #-----------------#
+
 #ifdef _WIN32
 void np_init()
 {
 	// reset everything
 	memset(&np_state, 0, sizeof(np_state));
-
-	// default foreground should be white
-	np_state.fg_color.r = 1;
-	np_state.fg_color.g = 1;
-	np_state.fg_color.b = 1;
 
 	CONSOLE_SCREEN_BUFFER_INFO bufferInfo;
 	np_state.consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -110,43 +115,74 @@ void np_internal_set_color()
 	WORD value = 0;
 
 	//TODO: add intensity for extra effect
-	//TODO: move these outside of the WIN32, could be useful on other platforms
 
-	if (np_state.fg_color.r > 127)
+	switch (np_state.fg_color)
+	{
+	default:
+		break;
+	case NP_BLACK:
+		// not set
+		break;
+	case NP_RED:
 		value += FOREGROUND_RED;
-
-	if (np_state.fg_color.g > 127)
+		break;
+	case NP_GREEN:
 		value += FOREGROUND_GREEN;
-
-	if (np_state.fg_color.b > 127)
+		break;
+	case NP_YELLOW:
+		value += FOREGROUND_RED | FOREGROUND_GREEN;
+		break;
+	case NP_BLUE:
 		value += FOREGROUND_BLUE;
+		break;
+	case NP_MAGENTA:
+		value += FOREGROUND_RED | FOREGROUND_BLUE;
+		break;
+	case NP_CYAN:
+		value += FOREGROUND_GREEN | FOREGROUND_BLUE;
+		break;
+	}
 
-	if (np_state.bg_color.r > 127)
+	switch (np_state.bg_color)
+	{
+	default:
+		break;
+	case NP_BLACK:
+		// not set
+		break;
+	case NP_RED:
 		value += BACKGROUND_RED;
-
-	if (np_state.bg_color.g > 127)
+		break;
+	case NP_GREEN:
 		value += BACKGROUND_GREEN;
-
-	if (np_state.bg_color.b > 127)
+		break;
+	case NP_YELLOW:
+		value += BACKGROUND_RED | BACKGROUND_GREEN;
+		break;
+	case NP_BLUE:
 		value += BACKGROUND_BLUE;
+		break;
+	case NP_MAGENTA:
+		value += BACKGROUND_RED | BACKGROUND_BLUE;
+		break;
+	case NP_CYAN:
+		value += BACKGROUND_GREEN | BACKGROUND_BLUE;
+		break;
+	}
 
 	SetConsoleTextAttribute(np_state.consoleHandle, value);
 }
 
-void np_fg_color(unsigned r, unsigned g, unsigned b)
+void np_fg_color(enum np_color color)
 {
-	np_state.fg_color.r = min(r, 255);
-	np_state.fg_color.g = min(g, 255);
-	np_state.fg_color.b = min(b, 255);
+	np_state.fg_color = color;
 
 	np_internal_set_color();
 }
 
-void np_bg_color(unsigned r, unsigned g, unsigned b)
+void np_bg_color(enum np_color color)
 {
-	np_state.bg_color.r = min(r, 255);
-	np_state.bg_color.g = min(g, 255);
-	np_state.bg_color.b = min(b, 255);
+	np_state.bg_color = color;
 
 	np_internal_set_color();
 }
@@ -215,4 +251,10 @@ unsigned np_width() { return np_state.width; }
 
 unsigned np_height() { return np_state.height; }
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif // NPRKL_H
+
+

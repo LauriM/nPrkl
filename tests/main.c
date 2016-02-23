@@ -1,7 +1,4 @@
-// # Usage
-// Just compile the file directly "clang main.c"
-
-#include "../../nPrkl.h"
+#include "../nPrkl.h"
 
 int main()
 {
