@@ -5,13 +5,14 @@ Are you tired of ncurses color limitations? Are you sick of PDCurses? Do you fin
 
 If you say yes, nPrkl might be the choice of a library for you.
 
-Features planned:
+!(Perkele)[http://i.imgur.com/mVU1iqd.png]
+
+Features:
 
 * single header file
 * real cross platform support
-* Support for extended colors if avaivable
-* Downscaling the colors on when needed
-* Input support
 
+Planned features:
 
-** The project is highly work in progress and I do not recommend to use it for now. **
+* truecolor support
+* input
