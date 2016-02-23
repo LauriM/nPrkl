@@ -18,10 +18,15 @@
 
 #include <assert.h>
 
-struct s_np_color {
-	unsigned r;
-	unsigned g;
-	unsigned b;
+enum np_color
+{
+	NP_BLACK = 0,
+	NP_RED,
+	NP_GREEN,
+	NP_YELLOW,
+	NP_BLUE,
+	NP_MAGENTA,
+	NP_CYAN,
 };
 
 struct s_np_state {
@@ -30,8 +35,8 @@ struct s_np_state {
 	unsigned cursor_pos_x;
 	unsigned cursor_pos_y;
 
-	struct s_np_color fg_color;
-	struct s_np_color bg_color;
+	enum np_color fg_color;
+	enum np_color bg_color;
 
 #ifdef _WIN32
 	HANDLE consoleHandle;
@@ -43,13 +48,11 @@ struct s_np_state np_state;
 // TODO
 // * Callback for events (screenresize)
 // * Writing strings
-// * Colors
-// * Buffering for more performance
-// * Linux support
+// * Buffering stuff for performance (?)
 // * title change support
-// * error handling
-// * Check for the VIRTUAL_TERMINAL_PROCESSING support on the platform (win32)
-// * !! INPUT !!
+// * better error handling
+// * Input support
+// * Hide cursor functionality
 
 // Initialize the nPrkl library, should always be called first
 void np_init();
@@ -57,8 +60,11 @@ void np_init();
 // Write a single char into a certain position
 void np_draw(unsigned x, unsigned y, char c);
 
-void np_fg_color(unsigned r, unsigned g, unsigned b);
-void np_bg_color(unsigned r, unsigned g, unsigned b);
+// Set the foreground color
+void np_fg_color(enum np_color color);
+
+// Set the background color
+void np_bg_color(enum np_color color);
 
 // Set cursor position, used internally
 void np_set_cursor_pos(unsigned x, unsigned y);
@@ -104,6 +110,7 @@ void np_internal_set_color()
 	WORD value = 0;
 
 	//TODO: add intensity for extra effect
+	//TODO: move these outside of the WIN32, could be useful on other platforms
 
 	if (np_state.fg_color.r > 127)
 		value += FOREGROUND_RED;
@@ -164,27 +171,42 @@ void np_init()
 	// reset everything
 	memset(&np_state, 0, sizeof(np_state));
 
-	// default foreground should be white
-	np_state.fg_color.r = 1;
-	np_state.fg_color.g = 1;
-	np_state.fg_color.b = 1;
-
 	struct winsize w;
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 
 	// Get the relevant information out
 	np_state.width = w.ws_row;
 	np_state.height = w.ws_col;
+
+	// Clear the whole terminal
+	printf("%c[2J", 0x1B);
 }
 
 void np_draw(unsigned x, unsigned y, char c)
 {
+	np_set_cursor_pos(x, y);
 
+	printf("%c", c);
+
+	printf("\n"); // force flush TODO: fix this
 }
 
 void np_set_cursor_pos(unsigned x, unsigned y)
 {
+	printf("%c[%d;%df", 0x1B , y, x);
+}
 
+void np_fg_color(enum np_color color)
+{
+	//switch..
+	//   ESC[ … 38;2;<r>;<g>;<b> … m Select RGB foreground color
+	printf("%c[%dm", 0x1B, 30 + color);
+}
+
+void np_bg_color(enum np_color color)
+{
+	// 48 is bg
+	printf("%c[%dm", 0x1B, 40 + color);
 }
 
 #endif // __linux__
