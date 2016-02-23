@@ -12,3 +12,6 @@ Features planned:
 * Support for extended colors if avaivable
 * Downscaling the colors on when needed
 * Input support
+
+
+** The project is highly work in progress and I do not recommend to use it for now. **
