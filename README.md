@@ -5,7 +5,7 @@ Are you tired of ncurses color limitations? Are you sick of PDCurses? Do you fin
 
 If you say yes, nPrkl might be the choice of a library for you.
 
-!(Perkele)[http://i.imgur.com/mVU1iqd.png]
+![Perkele](http://i.imgur.com/mVU1iqd.png)
 
 Features:
 
