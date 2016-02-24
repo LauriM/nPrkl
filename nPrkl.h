@@ -31,6 +31,7 @@ enum np_color
 	NP_BLUE,
 	NP_MAGENTA,
 	NP_CYAN,
+  NP_WHITE
 };
 
 struct s_np_state {
@@ -65,6 +66,9 @@ void np_init();
 
 // Write a single char into a certain position
 void np_draw(unsigned x, unsigned y, char c);
+
+// Ok
+void np_draws(unsigned x, unsigned y, char * s);
 
 // Set the foreground color
 void np_fg_color(enum np_color color);
@@ -141,6 +145,9 @@ void np_internal_set_color()
 	case NP_CYAN:
 		value += FOREGROUND_GREEN | FOREGROUND_BLUE;
 		break;
+  case NP_WHITE:
+    value += FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
+    break;
 	}
 
 	switch (np_state.bg_color)
@@ -168,6 +175,9 @@ void np_internal_set_color()
 	case NP_CYAN:
 		value += BACKGROUND_GREEN | BACKGROUND_BLUE;
 		break;
+  case NP_WHITE:
+    value += BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE;
+    break;
 	}
 
 	SetConsoleTextAttribute(np_state.consoleHandle, value);
@@ -221,10 +231,14 @@ void np_init()
 void np_draw(unsigned x, unsigned y, char c)
 {
 	np_set_cursor_pos(x, y);
-
 	printf("%c", c);
-
 	printf("\n"); // force flush TODO: fix this
+}
+
+void np_draw_string(unsigned x, unsigned y, char * s) {
+  np_set_cursor_pos(x, y);
+  printf("%s", s);
+  printf("\n");
 }
 
 void np_set_cursor_pos(unsigned x, unsigned y)
