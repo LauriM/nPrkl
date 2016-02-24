@@ -1,0 +1,10 @@
+language: c
+compiler: clang
+script: make
+notifications:
+    email:
+        on_success: change
+        on_failure: change
+
+before_install:
+- cd tests/linux
