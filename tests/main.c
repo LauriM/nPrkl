@@ -27,6 +27,8 @@ int main()
 
 		np_bg_color(NP_GREEN);
 		np_draw(i, 16, '#');
+
+		np_draw_string(0, 20, "Hello world, testing strings!");
 	}
 
 	for(;;)
