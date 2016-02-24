@@ -31,7 +31,7 @@ enum np_color
 	NP_BLUE,
 	NP_MAGENTA,
 	NP_CYAN,
-  NP_WHITE
+	NP_WHITE
 };
 
 struct s_np_state {
