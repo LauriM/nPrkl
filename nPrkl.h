@@ -34,7 +34,17 @@ enum np_color
 	NP_WHITE
 };
 
-struct s_np_state {
+// State for a single tile
+struct s_np_tile_state
+{
+	char c;
+	enum np_color fg_color;
+	enum np_color bg_color;
+};
+
+// State for the whole nPrkl
+struct s_np_state 
+{
 	unsigned width;
 	unsigned height;
 	unsigned cursor_pos_x;
@@ -48,7 +58,7 @@ struct s_np_state {
 #endif
 };
 
-struct s_np_state np_state;
+static struct s_np_state np_state;
 
 // TODO
 // * Support for the HILIGHTED colors
@@ -61,6 +71,8 @@ struct s_np_state np_state;
 // * Hide cursor functionality
 // * static / extern include
 // * PERF: Remove forced flusing !
+
+// Currently only one state is supported per application.
 
 // Initialize the nPrkl library, should always be called first
 void np_init();
@@ -103,7 +115,7 @@ void np_init()
 
 	// Get the relevant information out
 	np_state.width = bufferInfo.dwSize.X;
-	np_state.height = bufferInfo.dwSize.Y;
+	np_state.height = bufferInfo.srWindow.Bottom - bufferInfo.srWindow.Top + 1;
 }
 
 void np_draw(unsigned x, unsigned y, char c)
