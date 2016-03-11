@@ -16,6 +16,7 @@
 #include <string.h>
 #endif
 
+#include <stdlib.h>
 #include <assert.h>
 
 #ifdef __cplusplus
@@ -56,11 +57,14 @@ struct s_np_state
 #ifdef _WIN32
 	HANDLE consoleHandle;
 #endif
+
+	struct s_np_tile_state *buffer;
 };
 
 static struct s_np_state np_state;
 
 // TODO
+// * np_draw_string doesn't have caching !
 // * Support for the HILIGHTED colors
 // * Callback for events (screenresize)
 // * Writing strings
@@ -71,11 +75,19 @@ static struct s_np_state np_state;
 // * Hide cursor functionality
 // * static / extern include
 // * PERF: Remove forced flusing !
+// * If cpp is enabled, use namespaces to hide stuff that should not be used
 
 // Currently only one state is supported per application.
+// _internal or _shared functions should not be called directly
 
 // Initialize the nPrkl library, should always be called first
 void np_init();
+
+// Release memory allocated by nPrkl
+void np_uninit();
+
+// Call once per frame
+void np_update();
 
 // Write a single char into a certain position
 void np_draw(unsigned x, unsigned y, char c);
@@ -101,6 +113,34 @@ unsigned np_height();
 // #-----------------#
 // # implementations #
 // #-----------------#
+// Shared implementations are used by all different platforms
+
+void np_shared_init()
+{
+	// Allocate a buffer
+	np_state.buffer = (struct s_np_tile_state*)malloc(sizeof(struct s_np_tile_state) * np_state.width * np_state.height);
+
+	assert(np_state.buffer != NULL);
+
+	for (unsigned x = 0; x < np_state.width; ++x)
+	{
+		for (unsigned y = 0 ; y < np_state.height; ++y)
+		{
+			struct s_np_tile_state *tile = &np_state.buffer[np_state.width * y + x];
+
+			// set the default colors
+			tile->c = ' ';
+			tile->fg_color = NP_WHITE;
+			tile->bg_color = NP_BLACK;
+		}
+	}
+
+}
+
+void np_shared_uninit()
+{
+	free(np_state.buffer);
+}
 
 #ifdef _WIN32
 void np_init()
@@ -116,16 +156,41 @@ void np_init()
 	// Get the relevant information out
 	np_state.width = bufferInfo.dwSize.X;
 	np_state.height = bufferInfo.srWindow.Bottom - bufferInfo.srWindow.Top + 1;
+
+	np_shared_init();
+}
+
+void np_uninit()
+{
+	np_shared_uninit();
 }
 
 void np_draw(unsigned x, unsigned y, char c)
 {
+	assert(x <= np_width());
+	assert(y <= np_height());
+
+	// check cache
+	struct s_np_tile_state *tile = &np_state.buffer[np_state.width * y + x];
+
+	if (c == tile->c && np_state.bg_color == tile->bg_color && np_state.fg_color == tile->fg_color)
+		return; // Nothing changed!
+
 	np_set_cursor_pos(x, y);
 
 	unsigned written;
 	WriteConsole(np_state.consoleHandle, &c, 1, &written, NULL);
 
 	assert(written == 1);
+
+	// Update cache
+	tile->c = c;
+	tile->fg_color = np_state.fg_color;
+	tile->bg_color = np_state.bg_color;
+}
+
+void np_update()
+{
 }
 
 void np_draw_string(unsigned x, unsigned y, char *s)
@@ -250,20 +315,45 @@ void np_init()
 
 	// Clear the whole terminal
 	printf("%c[2J", 0x1B);
+
+	np_shared_init();
+}
+
+void np_uninit()
+{
+	np_shared_uninit();
 }
 
 void np_draw(unsigned x, unsigned y, char c)
 {
+	assert(x <= np_width());
+	assert(y <= np_height());
+
+	// check cache
+	struct s_np_tile_state *tile = &np_state.buffer[np_state.width * y + x];
+
+	if (c == tile->c && np_state.bg_color == tile->bg_color && np_state.fg_color == tile->fg_color)
+		return; // Nothing changed!
+
 	np_set_cursor_pos(x, y);
 	printf("%c", c);
-	printf("\n"); // force flush TODO: fix this
+
+	// Update cache
+	tile->c = c;
+	tile->fg_color = np_state.fg_color;
+	tile->bg_color = np_state.bg_color;
+}
+
+void np_update()
+{
+	np_set_cursor_pos(np_width(), np_height());
+	printf("\n");
 }
 
 void np_draw_string(unsigned x, unsigned y, char *s)
 {
 	np_set_cursor_pos(x, y);
 	printf("%s", s);
-	printf("\n");
 }
 
 void np_set_cursor_pos(unsigned x, unsigned y)
