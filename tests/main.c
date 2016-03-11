@@ -63,7 +63,7 @@ int main()
 		// Call once per "frame"
 		np_update();
 
-		int a = getch();
+		int a = getchar();
 	}
 
 	np_uninit();
