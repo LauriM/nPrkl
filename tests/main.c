@@ -55,6 +55,11 @@ int main()
 
 		np_draw(pos_x, pos_y, '@');
 
+		np_fg_color(NP_WHITE);
+		np_bg_color(NP_BLACK);
+
+		np_draw_string(1, 1, "Hello world from nPrkl!");
+
 		// Call once per "frame"
 		np_update();
 

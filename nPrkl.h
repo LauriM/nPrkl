@@ -64,17 +64,13 @@ struct s_np_state
 static struct s_np_state np_state;
 
 // TODO
-// * np_draw_string doesn't have caching !
 // * Support for the HILIGHTED colors
 // * Callback for events (screenresize)
-// * Writing strings
-// * Buffering stuff for performance (?)
 // * title change support
 // * better error handling
 // * Input support
 // * Hide cursor functionality
 // * static / extern include
-// * PERF: Remove forced flusing !
 // * If cpp is enabled, use namespaces to hide stuff that should not be used
 
 // Currently only one state is supported per application.
@@ -162,6 +158,7 @@ void np_init()
 
 void np_uninit()
 {
+
 	np_shared_uninit();
 }
 
@@ -191,16 +188,7 @@ void np_draw(unsigned x, unsigned y, char c)
 
 void np_update()
 {
-}
-
-void np_draw_string(unsigned x, unsigned y, char *s)
-{
-	np_set_cursor_pos(x, y);
-
-	unsigned written;
-	WriteConsole(np_state.consoleHandle, s, strlen(s), &written, NULL);
-
-	assert(written == strlen(s));
+	/* stub */
 }
 
 void np_internal_set_color()
@@ -350,12 +338,6 @@ void np_update()
 	printf("\n");
 }
 
-void np_draw_string(unsigned x, unsigned y, char *s)
-{
-	np_set_cursor_pos(x, y);
-	printf("%s", s);
-}
-
 void np_set_cursor_pos(unsigned x, unsigned y)
 {
 	printf("%c[%d;%df", 0x1B , y, x);
@@ -373,9 +355,28 @@ void np_bg_color(enum np_color color)
 
 #endif // __linux__
 
+// Implementations that are the same for both platforms
+
 unsigned np_width() { return np_state.width; }
 
 unsigned np_height() { return np_state.height; }
+
+void np_draw_string(unsigned x, unsigned y, char *s)
+{
+	unsigned len = strlen(s);
+	unsigned i = 0;
+
+	while (i < len)
+	{
+		np_set_cursor_pos(x, y);
+
+		// draw one by one to make sure caching is working
+		np_draw(x, y, s[i]);
+
+		++x;
+		++i;
+	}
+}
 
 #ifdef __cplusplus
 }
