@@ -12,7 +12,7 @@
 
 void nprkl_sleep(int s)
 {
-#ifdef WINDOWS
+#ifdef _WIN32
 	Sleep(s);
 #else
 	usleep(s * 1000);   // usleep takes sleep time in us (1 millionth of a second)
