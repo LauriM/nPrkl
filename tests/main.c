@@ -3,36 +3,25 @@
 
 #include <stdio.h>
 
+#ifdef LINUX
+#include <unistd.h>
+#endif
+#ifdef WINDOWS
+#include <windows.h>
+#endif
+
+void nprkl_sleep(int s)
+{
+#ifdef WINDOWS
+	Sleep(s);
+#else
+	usleep(s * 1000);   // usleep takes sleep time in us (1 millionth of a second)
+#endif
+}
+
 int main()
 {
 	np_init();
-
-	for(unsigned i = 0; i < 8; ++i)
-	{
-		np_bg_color(i);
-		np_draw(i, i, 'X');
-	}
-
-	np_bg_color(NP_BLACK);
-
-	for(unsigned i = 0; i < 8; ++i)
-	{
-		np_fg_color(i);
-		np_draw(10 - i, i, 'X');
-	}
-
-	for(unsigned i = 0; i < np_width(); ++i)
-	{
-		np_fg_color(NP_BLACK);
-
-		np_bg_color(NP_RED);
-		np_draw(i, 15, '#');
-
-		np_bg_color(NP_GREEN);
-		np_draw(i, 16, '#');
-
-		np_draw_string(0, 20, "Hello world, testing strings!");
-	}
 
 	// Testing out "normal" kind of rendering, where the whole scene is rendered from scracth every frame
 	// nPrkl is going to handle the caching and making sure only icons that have changed are rendered
@@ -41,12 +30,12 @@ int main()
 	int pos_y = 5;
 	for (;;)
 	{
-		// Fill whole scene with #
+		// Fill almost the whole scene with #
 		np_fg_color(NP_GREEN);
 		np_bg_color(NP_BLACK);
 
-		for (unsigned x = 1; x < np_width() - 1; ++x)
-		for (unsigned y = 1; y < np_height() - 1; ++y)
+		for (unsigned x = 2; x < 20; ++x)
+		for (unsigned y = 2; y < 20; ++y)
 			np_draw(x, y, '#');
 
 		++pos_x;
@@ -64,7 +53,7 @@ int main()
 		// Call once per "frame"
 		np_update();
 
-		int a = getchar();
+		nprkl_sleep(1);
 	}
 
 	np_uninit();
