@@ -2,3 +2,5 @@
 *.suo
 Debug/
 *.sdf
+
+tests/unix/nprkl
