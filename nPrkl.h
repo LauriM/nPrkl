@@ -9,7 +9,7 @@
 #include <Wincon.h>
 #endif
 
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
 #include <sys/ioctl.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -288,7 +288,7 @@ void np_set_cursor_pos(unsigned x, unsigned y)
 }
 #endif // _WIN32
 
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
 void np_init()
 {
 	// reset everything
