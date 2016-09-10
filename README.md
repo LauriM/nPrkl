@@ -16,6 +16,11 @@ Features:
 * single header file
 * real cross platform support
 
+Usage:
+
+* include nPrkl.h where you want to use it
+* in one compilation unit define NPRKL_IMPLEMENTATION before the include
+
 Planned features:
 
 * truecolor support

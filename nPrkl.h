@@ -64,17 +64,14 @@ struct s_np_state
 static struct s_np_state np_state;
 
 // TODO
+// * Only one state is supported
 // * Support for the HILIGHTED colors
 // * Callback for events (screenresize)
 // * title change support
 // * better error handling
 // * Input support
 // * Hide cursor functionality
-// * static / extern include
-// * If cpp is enabled, use namespaces to hide stuff that should not be used
-
-// Currently only one state is supported per application.
-// _internal or _shared functions should not be called directly
+// * If cpp is enabled, use namespaces
 
 // Initialize the nPrkl library, should always be called first
 void np_init();
@@ -97,9 +94,6 @@ void np_fg_color(enum np_color color);
 // Set the background color
 void np_bg_color(enum np_color color);
 
-// Set cursor position, used internally
-void np_set_cursor_pos(unsigned x, unsigned y);
-
 // Get console width in characters
 unsigned np_width();
 
@@ -110,6 +104,11 @@ unsigned np_height();
 // # implementations #
 // #-----------------#
 // Shared implementations are used by all different platforms
+
+#ifdef NPRKL_IMPLEMENTATION
+
+// Set cursor position, used internally
+void np_set_cursor_pos(unsigned x, unsigned y);
 
 void np_shared_init()
 {
@@ -377,6 +376,8 @@ void np_draw_string(unsigned x, unsigned y, char *s)
 		++i;
 	}
 }
+
+#endif // NPRKL_IMPLEMENTATION
 
 #ifdef __cplusplus
 }
